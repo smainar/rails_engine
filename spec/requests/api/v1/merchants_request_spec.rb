@@ -243,6 +243,17 @@ RSpec.describe "Merchants API" do
         expect(top_merchants_by_revenue[0]["id"]).to eq(@merchant_3.id.to_s)
         expect(top_merchants_by_revenue[1]["id"]).to eq(@merchant_1.id.to_s)
       end
+
+      it "returns the top x merchants ranked by total number of items sold" do
+        get "/api/v1/merchants/most_items?quantity=2"
+
+        top_merchants_by_items_sold = JSON.parse(response.body)["data"]
+
+        expect(response).to be_successful
+        expect(top_merchants_by_items_sold.count).to eq(2)
+        expect(top_merchants_by_items_sold[0]["id"]).to eq(@merchant_3.id.to_s)
+        expect(top_merchants_by_items_sold[1]["id"]).to eq(@merchant_1.id.to_s)
+      end
     end
   end
 end
