@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
-  get "/api/v1/merchants/:id/items", to: "api/v1/merchants/items#index"
 
   namespace :api do
     namespace :v1 do
@@ -8,6 +7,8 @@ Rails.application.routes.draw do
         get "/find", to: "search#show"
         get "/random", to: "search#show"
         get "/find_all", to: "search#index"
+        get "/:id/items", to: "items#index"
+        get "/:id/invoices", to: "invoices#index"
       end
 
       resources :merchants, only: [:index, :show]

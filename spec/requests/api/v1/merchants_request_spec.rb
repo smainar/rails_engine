@@ -167,4 +167,46 @@ RSpec.describe "Merchants API" do
       end
     end
   end
+
+  describe "Relationship Endpoints" do
+    context "Nested URLs" do
+      it "returns a collection of items associated with that merchant" do
+        merchant_1 = create(:merchant)
+        item_1 = create(:item, merchant: merchant_1)
+        item_2 = create(:item, merchant: merchant_1)
+
+        merchant_2 = create(:merchant)
+        item_3 = create(:item, merchant: merchant_2)
+
+        get "/api/v1/merchants/#{merchant_1.id}/items"
+
+        merchant_items = JSON.parse(response.body)
+
+        expect(response).to be_successful
+        expect(merchant_items["data"][0]["type"]).to eq("item")
+        expect(merchant_items["data"][0]["attributes"]["merchant_id"]).to eq(merchant_1.id)
+        expect(merchant_items["data"][0]["attributes"]["merchant_id"]).to eq(merchant_1.id)
+        expect(merchant_items["data"].count).to eq(2)
+      end
+
+      it "returns a collection of invoices associated with that merchant from their known orders" do
+        merchant_1 = create(:merchant)
+        invoice_1 = create(:invoice, merchant: merchant_1)
+        invoice_2 = create(:invoice, merchant: merchant_1)
+
+        merchant_2 = create(:merchant)
+        invoice_3 = create(:invoice, merchant: merchant_2)
+
+        get "/api/v1/merchants/#{merchant_1.id}/invoices"
+
+        merchant_invoices = JSON.parse(response.body)
+
+        expect(response).to be_successful
+        expect(merchant_invoices["data"][0]["type"]).to eq("invoice")
+        expect(merchant_invoices["data"][0]["attributes"]["merchant_id"]).to eq(merchant_1.id)
+        expect(merchant_invoices["data"][0]["attributes"]["merchant_id"]).to eq(merchant_1.id)
+        expect(merchant_invoices["data"].count).to eq(2)
+      end
+    end
+  end
 end
