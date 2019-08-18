@@ -1,3 +1,16 @@
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  get "/api/v1/merchants/:id/items", to: "api/v1/merchants/items#index"
+
+  namespace :api do
+    namespace :v1 do
+      namespace :merchants do
+        get "/find", to: "search#show"
+        get "/random", to: "search#show"
+        get "/find_all", to: "search#index"
+      end
+
+      resources :merchants, only: [:index, :show]
+    end
+  end
 end
