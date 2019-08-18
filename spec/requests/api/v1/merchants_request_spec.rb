@@ -209,4 +209,40 @@ RSpec.describe "Merchants API" do
       end
     end
   end
+  describe "Business Intelligence Endpoints" do
+    before(:each) do
+      @customer = create(:customer)
+
+      @merchant_1 = create(:merchant)
+      @item_1 = create(:item, merchant: @merchant_1)
+      @invoice_1 = create(:invoice, merchant: @merchant_1, customer: @customer)
+      @invoice_item_1 = create(:invoice_item, invoice: @invoice_1, item: @item_1, unit_price: 1, quantity: 2)
+      @transaction_1 = create(:transaction, invoice: @invoice_1, result: "success")
+
+      @merchant_2 = create(:merchant)
+      @item_2 = create(:item, merchant: @merchant_2)
+      @invoice_2 = create(:invoice, merchant: @merchant_2, customer: @customer)
+      @invoice_item_2 = create(:invoice_item, invoice: @invoice_2, item: @item_2, unit_price: 3, quantity: 4)
+      @transaction_2 = create(:transaction, invoice: @invoice_2, result: "failed")
+
+      @merchant_3 = create(:merchant)
+      @item_3 = create(:item, merchant: @merchant_3)
+      @invoice_3 = create(:invoice, merchant: @merchant_3, customer: @customer)
+      @invoice_item_3 = create(:invoice_item, invoice: @invoice_3, item: @item_3, unit_price: 5, quantity: 6)
+      @transaction_3 = create(:transaction, invoice: @invoice_3, result: "success")
+    end
+
+    context "ActiveRecord Queries - All Merchants" do
+      it "returns the top x merchants ranked by total revenue" do
+        get "/api/v1/merchants/most_revenue?quantity=2"
+
+        top_merchants_by_revenue = JSON.parse(response.body)["data"]
+
+        expect(response).to be_successful
+        expect(top_merchants_by_revenue.count).to eq(2)
+        expect(top_merchants_by_revenue[0]["id"]).to eq(@merchant_3.id.to_s)
+        expect(top_merchants_by_revenue[1]["id"]).to eq(@merchant_1.id.to_s)
+      end
+    end
+  end
 end
