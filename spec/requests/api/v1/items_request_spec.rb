@@ -63,6 +63,29 @@ RSpec.describe "Items API" do
         expect(item["attributes"]["name"]).to_not eq(item_1.name)
       end
 
+      it "returns a single item by data category (attribute) - unit price" do
+        item_1 = create(:item, unit_price: 100)
+        item_2 = create(:item, unit_price: 200)
+
+        get "/api/v1/items/find?unit_price=1.00"
+        item = JSON.parse(response.body)["data"]
+
+        expect(response).to be_successful
+        expect(item["attributes"]["unit_price"]).to eq(((item_1.unit_price) / 100.0).to_s)
+      end
+
+      it "returns a single item by data category (attribute) - merchant id" do
+        merchant = create(:merchant)
+        item_1 = create(:item, merchant_id: merchant.id)
+
+        get "/api/v1/items/find?merchant_id=#{item_1.merchant_id}"
+        items = JSON.parse(response.body)["data"]
+
+        expect(response).to be_successful
+        expect(items["attributes"]["id"]).to eq(item_1.id)
+        expect(items["attributes"]["merchant_id"]).to eq(item_1.merchant_id)
+      end
+
       it "returns a single item by data category (attribute) - created at" do
         item_1 = create(:item, created_at: "2012-03-27T14:54:02.000Z")
         item_2 = create(:item, created_at: "2019-03-27T14:54:02.000Z")
@@ -108,6 +131,33 @@ RSpec.describe "Items API" do
         expect(response).to be_successful
         expect(item[0]["attributes"]["name"]).to eq(item_3.name)
         expect(item.count).to eq(1)
+      end
+
+      it "returns all matches for the given data category (attribute) - unit price" do
+        item_1 = create(:item, unit_price: 100)
+        item_2 = create(:item, unit_price: 200)
+
+        get "/api/v1/items/find_all?unit_price=#{(item_1.unit_price / 100.0)}"
+        items = JSON.parse(response.body)["data"]
+
+        expect(response).to be_successful
+        expect(items[0]["type"]).to eq("item")
+        expect(items[0]["attributes"]["unit_price"]).to eq(((item_1.unit_price) / 100.0).to_s)
+      end
+
+      it "returns all matches for the given data category (attribute) - merchant id" do
+        merchant = create(:merchant)
+        item_1 = create(:item, merchant_id: merchant.id)
+        item_2 = create(:item, merchant_id: merchant.id)
+
+        get "/api/v1/items/find_all?merchant_id=#{item_1.merchant_id}"
+        items = JSON.parse(response.body)["data"]
+
+        expect(response).to be_successful
+        expect(items[0]["attributes"]["id"]).to eq(item_1.id)
+        expect(items[0]["attributes"]["merchant_id"]).to eq(item_1.merchant_id)
+        expect(items[1]["attributes"]["id"]).to eq(item_2.id)
+        expect(items[1]["attributes"]["merchant_id"]).to eq(item_2.merchant_id)
       end
 
       it "returns all matches for the given data category (attribute) - created at" do
