@@ -1,24 +1,23 @@
-# README
+# Rales Engine - README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## About
 
-Things you may want to cover:
+Rales Engine is a JSON API which retrieves data from the following database tables: merchants, items, customers, invoices, invoice_items, and transactions. Only ReSTful controller actions were allowed (`#index` & `#show`). 
 
-* Ruby version
+## Setup on your machine
 
-* System dependencies
+* Ruby version 2.4.1
 
 * Configuration
+`$bundle`
 
 * Database creation
+`$bundle exec rake db:drop`
+`$bundle exec rake db:create`
+`$bundle exec rake db:migrate`
 
 * Database initialization
+`$bundle exec rake csv_import`
 
 * How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+`$bundle exec rspec`
