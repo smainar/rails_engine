@@ -167,4 +167,63 @@ RSpec.describe "Items API" do
       end
     end
   end
+
+  describe "Relationship Endpoints" do
+    before(:each) do
+      @customer = create(:customer)
+
+      @merchant_1 = create(:merchant)
+      @item_1 = create(:item, merchant: @merchant_1)
+      @invoice_1 = create(:invoice, merchant: @merchant_1, customer: @customer)
+      @invoice_item_1 = create(:invoice_item, invoice: @invoice_1, item: @item_1, unit_price: 1, quantity: 2)
+      @transaction_1 = create(:transaction, invoice: @invoice_1, result: "success")
+
+      @merchant_2 = create(:merchant)
+      @item_2 = create(:item, merchant: @merchant_2)
+      @invoice_2 = create(:invoice, merchant: @merchant_2, customer: @customer)
+      @invoice_item_2 = create(:invoice_item, invoice: @invoice_2, item: @item_2, unit_price: 3, quantity: 4)
+      @transaction_2 = create(:transaction, invoice: @invoice_2, result: "failed")
+
+      @merchant_3 = create(:merchant)
+      @item_3 = create(:item, merchant: @merchant_3)
+      @invoice_3 = create(:invoice, merchant: @merchant_3, customer: @customer)
+      @invoice_item_3 = create(:invoice_item, invoice: @invoice_3, item: @item_3, unit_price: 5, quantity: 6)
+      @invoice_item_4 = create(:invoice_item, invoice: @invoice_3, item: @item_1, unit_price: 1, quantity: 5)
+      @transaction_3 = create(:transaction, invoice: @invoice_3, result: "success")
+    end
+
+    context "Nested URLs" do
+      it "returns a collection of associated invoice items" do
+        get "/api/v1/items/#{@item_1.id}/invoice_items"
+
+        invoice_items = JSON.parse(response.body)
+
+        expect(response).to be_successful
+        expect(invoice_items["data"][0]["type"]).to eq("invoice_item")
+        expect(invoice_items["data"][0]["attributes"]["item_id"]).to eq(@item_1.id)
+        expect(invoice_items["data"][0]["attributes"]["quantity"]).to eq(@invoice_item_1.quantity)
+        expect(invoice_items["data"][1]["attributes"]["item_id"]).to eq(@item_1.id)
+        expect(invoice_items["data"][1]["attributes"]["quantity"]).to eq(@invoice_item_4.quantity)
+        expect(invoice_items["data"].count).to eq(2)
+      end
+
+      it "returns the associated merchant" do
+        get "/api/v1/items/#{@item_1.id}/merchant"
+
+        merchant = JSON.parse(response.body)
+
+        expect(response).to be_successful
+        expect(merchant["data"]["type"]).to eq("merchant")
+        expect(merchant["data"]["attributes"]["id"]).to eq(@merchant_1.id)
+
+        get "/api/v1/items/#{@item_2.id}/merchant"
+
+        merchant = JSON.parse(response.body)
+
+        expect(response).to be_successful
+        expect(merchant["data"]["type"]).to eq("merchant")
+        expect(merchant["data"]["attributes"]["id"]).to eq(@merchant_2.id)
+      end
+    end
+  end
 end
